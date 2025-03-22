@@ -15,19 +15,24 @@ symbol = input();
 
 if (symbol = notnull) {
   print("Chart Types /n ------------------");
-  print("1." + null); // probably make this; for i in symbol, i = "." + chartname
+  print("1. Bar");
+  print("2. Line"); // probably make this; for i in symbol, i = "." + chartname.
   print("Enter the chart type you want ("/*i, i++*/"): ";
   chart = input();
+    if (chart > 2) {
+        print("Enter a (1, 2) for a chart type");
+    }
 
   if (chart = notnull) {
     print("Select the Time Series of the chart you want to Generate /n ----------------------------------------------");
-    print("1." + null); //same thing as comment before
+    print("1." + null); //same thing as comment before. Intraday, Daily, Weekly, Monthly
     print("Enter time series option ("/*i, i++*/"): ";
     timeseries = input();
 
     if (timeseries = notnull) {
       print("Enter the start Date (YYYY-MM-DD): ");
       startday = input();
+        /*Error: Start date cannot be later than End date. Enter the dates again."*/
       print("Enter the end Date (YYYY-MM-DD): ");
       endday = input();
 
