@@ -24,8 +24,12 @@ def get_user_input():
     end_date = input("Please enter the end date (YYYY-MM-DD): ")
 
     # Make sure end date is after start date, if not re-ask.
-    while end_date <= start_date:
+    while end_date < start_date:
         print("Error: End date cannot be before start date.")
         end_date = input("Please enter the end date (YYYY-MM-DD): ")
+    
+def main():
+    get_user_input()
 
-get_user_input()
+if __name__ == "__main__":
+    main()
