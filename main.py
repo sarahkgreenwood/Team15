@@ -12,6 +12,44 @@
     API KEY: 19Z62OVAZ1XYL8JR
 '''
 
+def date_check(date):
+    year = int(date[0:4])
+    month = int(date[5:7])
+    day = int(date[8:10])
+
+    # Year Validation
+    if not (2004 <= year <= 2026):
+        print("No data available.")
+        return False
+
+    # Month Validation
+    if month not in range(1, 13):
+        print("Month is invalid.")
+        return False
+
+    # numDays(Month)
+    if month in [1, 3, 5, 7, 8, 10, 12]:  # Months with 31 days
+        if day > 31:
+            print("Day is invalid.")
+            return False
+    elif month in [4, 6, 9, 11]:  # Months with 30 days
+        if day > 30:
+            print("Day is invalid.")
+            return False
+    elif month == 2:  # February (leap year check)
+        if (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0):  # Leap year
+            if day > 29:
+                print("Day is invalid.")
+                return False
+        else:  # Non-leap year
+            if day > 28:
+                print("Day is invalid.")
+                return False
+
+    # If everything is fine
+    print("Date is valid.")
+    return True
+
 def get_user_input():
     # Prompt user for stock symbol, make sure it's not blank.
     stock_symbol = input("Please enter the stock symbol you are looking for (e.g. GOOG, AAPL): ").upper().strip()
@@ -37,8 +75,10 @@ def get_user_input():
 
     # Prompt user for both start date and end date.
     start_date = input("Please enter the start date (YYYY-MM-DD): ")
+    date_check(start_date)
     end_date = input("Please enter the end date (YYYY-MM-DD): ")
-
+    date_check(end_date)
+ 
     # Make sure end date is after start date, if not re-ask.
     while end_date < start_date:
         print("Error: End date cannot be before start date.")
