@@ -150,42 +150,15 @@ def get_input():
         print("Please enter 1, 2, 3, or 4.")
         time_series = input("Enter time series option (1, 2, 3, 4): ")
 
-    if (time_series == "1"):  # Intraday, checked, works
-        # Gather User Inputs
+    # Handle Intraday
+    interval = None
+    if time_series == "1":
         start_date = input("Please enter the day (YYYY-MM-DD): ")
-        trange = input("Please select the interval \n1. Minute \n 2. Hour: ")
+        interval = "60min"
+        date_check(start_date)
 
-        while trange not in ["1", "2"]:
-            trange = input("Please enter 1 or 2: ")
-
-        # Determine RANGE format
-        if trange == "1":
-            trange = "minute"
-            start_time = input("Enter start time (HH-MM-SS): ")
-            end_time = input("Enter end time (HH-MM-SS): ")
-            interval = "1min"
-        else:
-            trange = "hour"
-            start_time = input("Enter start hour (HH): ")
-            end_time = input("Enter end hour (HH): ")
-            interval = "60min"
-
-        # Validate times
-        start_time = checkTime(start_time)
-        end_time = checkTime(end_time)
-
-        if start_time and end_time:
-            # Format RANGE as "YYYY-MM-DDTHH:MM:SS"
-            range_value = f"{start_date}T{start_time}&RANGE={start_date}T{end_time}"
-            
-            # Build and print API URL
-            api_url = build_alphavantage_url(stock_symbol, range_value, interval, ["MEAN", "MEDIAN", "STDDEV", "CORRELATION"], "19Z62OVAZ1XYL8JR")
-            print(api_url)
-        else:
-            print("Invalid time input. Please try again.")
-
-    elif time_series == "2":  # DAILY
-        # Gather User Inputs
+    # Handle Daily, Weekly, or Monthly
+    else:
         start_date = input("Please enter the start date (YYYY-MM-DD): ")
         end_date = input("Please enter the end date (YYYY-MM-DD): ")
         
@@ -197,69 +170,41 @@ def get_input():
         while end_date < start_date:
             print("Error: End date cannot be before start date.")
             end_date = input("Please enter the end date (YYYY-MM-DD): ")
-    
-        # Calculate interval
-        interval = calculate_days(start_date, end_date)
-        
-        if interval:
-            # Format RANGE
-            range_value = f"{start_date}&RANGE={end_date}"
-            
-            # Build and print API URL
-            api_url = build_alphavantage_url(stock_symbol, range_value, interval, ["MEAN", "MEDIAN", "STDDEV", "CORRELATION"], "19Z62OVAZ1XYL8JR")
-            print(api_url)
-          
-    elif time_series == "3":  # WEEKLY
-        start_date = input("Enter start date (YYYY-MM-DD): ")
-        end_date = input("Enter end date (YYYY-MM-DD): ")
+        if time_series == "2":
+            calculate_days(start_date, end_date)
+        elif time_series == "3":
+            calculate_weeks(start_date, end_date)
+        else:
+            calculate_months(start_date, end_date)
 
-        # Validate input dates
-        date_check(start_date)
-        date_check(end_date)
+    # Build and print the API URL
+    api_url = build_alphavantage_url(stock_symbol, time_series, interval, "19Z62OVAZ1XYL8JR")
+    print(api_url)
 
-        # Make sure end date is after start date, if not re-ask.
-        while end_date < start_date:
-            print("Error: End date cannot be before start date.")
-            end_date = input("Please enter the end date (YYYY-MM-DD): ")
-
-        interval = calculate_weeks(start_date, end_date)
-        if interval:
-            range_value = f"{start_date}&RANGE={end_date}"
-            api_url = build_alphavantage_url(stock_symbol, range_value, interval, ["MEAN", "MEDIAN", "STDDEV", "CORRELATION"], "19Z62OVAZ1XYL8JR")
-            print(api_url)
-
-    else:  # "MONTHLY"
-        start_date = input("Enter start date (YYYY-MM-DD): ")
-        end_date = input("Enter end date (YYYY-MM-DD): ")
-
-        # Validate input dates
-        date_check(start_date)
-        date_check(end_date)
-
-        # Make sure end date is after start date, if not re-ask.
-        while end_date < start_date:
-            print("Error: End date cannot be before start date.")
-            end_date = input("Please enter the end date (YYYY-MM-DD): ")
-
-        interval = calculate_months(start_date, end_date)
-        if interval:
-            range_value = f"{start_date}&RANGE={end_date}"
-            api_url = build_alphavantage_url(stock_symbol, range_value, interval, ["MEAN", "MEDIAN", "STDDEV", "CORRELATION"], "19Z62OVAZ1XYL8JR")
-            print(api_url)
-
-def build_alphavantage_url(symbols, range_value, interval, calculations, apikey, ohlc="close"): # unsure if needed
+def build_alphavantage_url(symbols, time_series, interval, apikey):
     base_url = "https://www.alphavantage.co/query?"
+
+    if time_series == "1":
+        function_name = "TIME_SERIES_INTRADAY"
+    elif time_series == "2":
+        function_name = "TIME_SERIES_DAILY"
+    elif time_series == "3":
+        function_name = "TIME_SERIES_WEEKLY"
+    else:
+        function_name = "TIME_SERIES_MONTHLY"
+
     params = {
-        "function": "ANALYTICS_FIXED_WINDOW",
-        "SYMBOLS": symbols,
-        "RANGE": range_value,
-        "INTERVAL": interval,
-        "OHLC": ohlc,
-        "CALCULATIONS": ",".join(calculations),
-        "apikey": "19Z62OVAZ1XYL8JR"
+        "function": function_name,
+        "symbol": symbols,
+        "apikey": apikey
     }
-    
-    # Construct the full URL
+
+    if function_name in ["TIME_SERIES_DAILY", "TIME_SERIES_WEEKLY", "TIME_SERIES_MONTHLY"]:
+        params["outputsize"] = "full"
+
+    if function_name == "TIME_SERIES_INTRADAY" and interval:
+        params["interval"] = interval
+
     url_parts = [f"{key}={value}" for key, value in params.items()]
     full_url = base_url + "&".join(url_parts)
     return full_url
@@ -273,3 +218,6 @@ def main():
         if new != "y":
             print("Goodbye!")
             break
+
+if __name__ == "__main__":
+    main()
