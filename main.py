@@ -11,8 +11,8 @@
 
     API KEY: 19Z62OVAZ1XYL8JR
 
-pip install plotly.express //graphing mod
-pip install lxml // for chart to be rendered
+pip install plotly //graphing mod
+pip install pandas
 pip install requests
 '''
 
