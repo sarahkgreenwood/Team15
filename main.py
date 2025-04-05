@@ -11,7 +11,7 @@
 
     API KEY: 19Z62OVAZ1XYL8JR
 
-pip install pygal //graphing mod
+pip install plotly.express //graphing mod
 pip install lxml // for chart to be rendered
 pip install requests
 '''
